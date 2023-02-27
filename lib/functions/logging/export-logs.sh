@@ -9,9 +9,6 @@ function prepare_ansi_git_info_log_header() {
 		$(echo -e -n "${bright_blue_color:-}")# GIT status$(echo -e -n "${ansi_reset_color:-}")
 		$(LC_ALL=C LANG=C git -c color.status=always --work-tree="${SRC}" --git-dir="${SRC}/.git" status | sed -e "${prefix_sed_cmd}" || true)
 		${dim_line_separator}
-		$(echo -e -n "${bright_blue_color:-}")# GIT changes$(echo -e -n "${ansi_reset_color:-}")
-		$(LC_ALL=C LANG=C git --work-tree="${SRC}" --git-dir="${SRC}/.git" diff -u --color | sed -e "${prefix_sed_cmd}" || true)
-		${dim_line_separator}
 	GIT_ANSI_HEADER
 }
 
@@ -181,7 +178,7 @@ function export_raw_logs() {
 		display_alert "No target file specified for export_raw_logs()" "${target_file}" "err"
 		return 0
 	fi
-	
+
 	# Just tar the logs directory into target_file
 	tar -C "${LOGDIR}" -cf "${target_file}" .
 }
