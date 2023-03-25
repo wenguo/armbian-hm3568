@@ -107,16 +107,9 @@ function produce_repeat_args_array() {
 	# Make it easy to repeat build by displaying build options used. Prepare array.
 	declare -a -g repeat_args=("./compile.sh")
 	# @TODO: missing the config file name, if any.
-	# @TODO: missing the original cli command, if different from build/docker
-	[[ -n ${WHAT} ]] && repeat_args+=("${WHAT}")
-	[[ -n ${BOARD} ]] && repeat_args+=("BOARD=${BOARD}")
-	[[ -n ${BRANCH} ]] && repeat_args+=("BRANCH=${BRANCH}")
-	[[ -n ${RELEASE} ]] && repeat_args+=("RELEASE=${RELEASE}")
-	[[ -n ${BUILD_MINIMAL} ]] && repeat_args+=("BUILD_MINIMAL=${BUILD_MINIMAL}")
-	[[ -n ${BUILD_DESKTOP} ]] && repeat_args+=("BUILD_DESKTOP=${BUILD_DESKTOP}")
-	[[ -n ${KERNEL_CONFIGURE} ]] && repeat_args+=("KERNEL_CONFIGURE=${KERNEL_CONFIGURE}")
-	[[ -n ${DESKTOP_ENVIRONMENT} ]] && repeat_args+=("DESKTOP_ENVIRONMENT=${DESKTOP_ENVIRONMENT}")
-	[[ -n ${DESKTOP_ENVIRONMENT_CONFIG_NAME} ]] && repeat_args+=("DESKTOP_ENVIRONMENT_CONFIG_NAME=${DESKTOP_ENVIRONMENT_CONFIG_NAME}")
-	[[ -n ${DESKTOP_APPGROUPS_SELECTED} ]] && repeat_args+=("DESKTOP_APPGROUPS_SELECTED=\"${DESKTOP_APPGROUPS_SELECTED:-"none"}\"")
-	[[ -n ${COMPRESS_OUTPUTIMAGE} ]] && repeat_args+=("COMPRESS_OUTPUTIMAGE=${COMPRESS_OUTPUTIMAGE}")
+	repeat_args+=(${ARMBIAN_NON_PARAM_ARGS[*]})
+	for param_name in "${!ARMBIAN_PARSED_CMDLINE_PARAMS[@]}"; do
+		# Parameter values are quoted to be on the safe side.
+		repeat_args+=("${param_name}=${ARMBIAN_PARSED_CMDLINE_PARAMS[$param_name]@Q}")
+	done
 }
