@@ -112,4 +112,8 @@ function produce_repeat_args_array() {
 		# Parameter values are quoted to be on the safe side.
 		repeat_args+=("${param_name}=${ARMBIAN_PARSED_CMDLINE_PARAMS[$param_name]@Q}")
 	done
+	for param_name in "${!ARMBIAN_INTERACTIVE_CONFIGS[@]}"; do
+		# Parameter values are quoted to be on the safe side.
+		repeat_args+=("${param_name}=${ARMBIAN_INTERACTIVE_CONFIGS[$param_name]@Q}")
+	done
 }
