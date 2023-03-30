@@ -382,7 +382,7 @@ function install_distribution_agnostic() {
 	# install armbian-zsh
 	if [[ "${PACKAGE_LIST_RM}" != *armbian-zsh* ]]; then
 		if [[ $BUILD_MINIMAL != yes ]]; then
-			install_deb_chroot "${DEB_STORAGE}/${image_artifacts_debs["armbian-config"]}"
+			install_deb_chroot "${DEB_STORAGE}/${image_artifacts_debs["armbian-zsh"]}"
 		fi
 	fi
 
@@ -398,11 +398,13 @@ function install_distribution_agnostic() {
 
 	# freeze armbian packages
 	if [[ "${BSPFREEZE:-"no"}" == yes ]]; then
-		exit_with_error "BSPFREEZE=yes is unsupported, go fix it!"
-
-		# display_alert "Freezing Armbian packages" "$BOARD" "info"
-		# @TODO: rpardini: this will fail if one or more packages are not installed. instead: keep list of installed ones (code above) and freeze only those.
-		# chroot_sdcard apt-mark hold "${CHOSEN_KERNEL}" "${CHOSEN_KERNEL/image/headers}" "linux-u-boot-${BOARD}-${BRANCH}" "${CHOSEN_KERNEL/image/dtb}"
+		display_alert "Freezing Armbian packages" "$BOARD" "info"
+		chroot_sdcard apt-mark hold "${image_artifacts_packages["armbian-plymouth-theme"]}" "${image_artifacts_packages["armbian-zsh"]}" \
+		"${image_artifacts_packages["armbian-config"]}" "${image_artifacts_packages["armbian-bsp-desktop"]}" \
+		"${image_artifacts_packages["armbian-desktop"]}" "${image_artifacts_packages["armbian-bsp-cli"]}" \
+		"${image_artifacts_packages["armbian-firmware"]}" "${image_artifacts_packages["armbian-firmware-full"]}" \
+		"${image_artifacts_packages["linux-headers"]}" "${image_artifacts_packages["linux-dtb"]}" \
+		"${image_artifacts_packages["linux-image"]}" "${image_artifacts_packages["uboot"]}" || true
 	fi
 
 	# remove deb files
