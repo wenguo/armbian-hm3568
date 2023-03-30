@@ -396,6 +396,15 @@ function install_distribution_agnostic() {
 		install_deb_chroot "wireguard-tools" "remote"
 	fi
 
+	# freeze armbian packages
+	if [[ "${BSPFREEZE:-"no"}" == yes ]]; then
+		exit_with_error "BSPFREEZE=yes is unsupported, go fix it!"
+
+		# display_alert "Freezing Armbian packages" "$BOARD" "info"
+		# @TODO: rpardini: this will fail if one or more packages are not installed. instead: keep list of installed ones (code above) and freeze only those.
+		# chroot_sdcard apt-mark hold "${CHOSEN_KERNEL}" "${CHOSEN_KERNEL/image/headers}" "linux-u-boot-${BOARD}-${BRANCH}" "${CHOSEN_KERNEL/image/dtb}"
+	fi
+
 	# remove deb files
 	run_host_command_logged rm -fv "${SDCARD}"/root/*.deb
 
