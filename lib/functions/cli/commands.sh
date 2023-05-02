@@ -23,28 +23,35 @@ function armbian_register_commands() {
 		["configdump"]="config_dump_json"       # implemented in cli_config_dump_json_pre_run and cli_config_dump_json_run
 		["config-dump-json"]="config_dump_json" # implemented in cli_config_dump_json_pre_run and cli_config_dump_json_run
 
-		["json-info-boards"]="json_info"               # implemented in cli_json_info_pre_run and cli_json_info_run
-		["write-all-boards-branches-json"]="json_info" # implemented in cli_json_info_pre_run and cli_json_info_run
+		["inventory"]="json_info" # implemented in cli_json_info_pre_run and cli_json_info_run
+		["targets"]="json_info"   # implemented in cli_json_info_pre_run and cli_json_info_run
+		["matrix"]="json_info"    # implemented in cli_json_info_pre_run and cli_json_info_run
+		["workflow"]="json_info"  # implemented in cli_json_info_pre_run and cli_json_info_run
 
 		["kernel-patches-to-git"]="patch_kernel" # implemented in cli_patch_kernel_pre_run and cli_patch_kernel_run
 
 		["build"]="standard_build" # implemented in cli_standard_build_pre_run and cli_standard_build_run
 		["distccd"]="distccd"      # implemented in cli_distccd_pre_run and cli_distccd_run
+		["flash"]="flash"          # implemented in cli_flash_pre_run and cli_flash_run
 
 		# external tooling, made easy.
 		["oras-upload"]="oras" # implemented in cli_oras_pre_run and cli_oras_run; up/down/info are the same, see vars below
 
 		# all-around artifact wrapper
-		["artifact"]="artifact" # implemented in cli_artifact_pre_run and cli_artifact_run
+		["artifact"]="artifact"                  # implemented in cli_artifact_pre_run and cli_artifact_run
+		["artifact-config-dump-json"]="artifact" # implemented in cli_artifact_pre_run and cli_artifact_run
 
 		# shortcuts, see vars set below. the use legacy single build, and try to control it via variables
 		["rootfs"]="artifact"
 
 		["kernel"]="artifact"
+		["kernel-patch"]="artifact"
 		["kernel-config"]="artifact"
 
-		["u-boot"]="artifact"
 		["uboot"]="artifact"
+		["uboot-patch"]="artifact"
+		["atf-patch"]="artifact"
+		["uboot-config"]="artifact"
 
 		["firmware"]="artifact"
 		["firmware-full"]="artifact"
@@ -63,6 +70,9 @@ function armbian_register_commands() {
 	# common for all CLI-based artifact shortcuts
 	declare common_cli_artifact_vars=""
 
+	# common for interactive artifact shortcuts (configure, patch, etc)
+	declare common_cli_artifact_interactive_vars="ARTIFACT_WILL_NOT_BUILD='yes' ARTIFACT_BUILD_INTERACTIVE='yes' ARTIFACT_IGNORE_CACHE='yes'"
+
 	# Vars to be set for each command. Optional.
 	declare -g -A ARMBIAN_COMMANDS_TO_VARS_DICT=(
 		["docker-purge"]="DOCKER_SUBCMD='purge'"
@@ -72,14 +82,19 @@ function armbian_register_commands() {
 
 		["generate-dockerfile"]="DOCKERFILE_GENERATE_ONLY='yes'"
 
+		["artifact-config-dump-json"]='CONFIG_DEFS_ONLY="yes"'
+
 		# artifact shortcuts
 		["rootfs"]="WHAT='rootfs' ${common_cli_artifact_vars}"
 
-		["kernel-config"]="WHAT='kernel' KERNEL_CONFIGURE='yes' ARTIFACT_BUILD_INTERACTIVE='yes' ARTIFACT_IGNORE_CACHE='yes' ${common_cli_artifact_vars}"
 		["kernel"]="WHAT='kernel' ${common_cli_artifact_vars}"
+		["kernel-config"]="WHAT='kernel' KERNEL_CONFIGURE='yes' ${common_cli_artifact_interactive_vars} ${common_cli_artifact_vars}"
+		["kernel-patch"]="WHAT='kernel' CREATE_PATCHES='yes' ${common_cli_artifact_interactive_vars} ${common_cli_artifact_vars}"
 
 		["uboot"]="WHAT='uboot' ${common_cli_artifact_vars}"
-		["u-boot"]="WHAT='uboot' ${common_cli_artifact_vars}"
+		["uboot-config"]="WHAT='uboot' UBOOT_CONFIGURE='yes' ${common_cli_artifact_interactive_vars} ${common_cli_artifact_vars}"
+		["uboot-patch"]="WHAT='uboot' CREATE_PATCHES='yes' ${common_cli_artifact_interactive_vars} ${common_cli_artifact_vars}"
+		["atf-patch"]="WHAT='uboot' CREATE_PATCHES_ATF='yes' ${common_cli_artifact_interactive_vars} ${common_cli_artifact_vars}"
 
 		["firmware"]="WHAT='firmware' ${common_cli_artifact_vars}"
 		["firmware-full"]="WHAT='full_firmware' ${common_cli_artifact_vars}"
@@ -102,6 +117,7 @@ function armbian_register_commands() {
 
 	# Keep a running dict of params/variables. Can't repeat stuff here. Dict.
 	declare -g -A ARMBIAN_CLI_RELAUNCH_PARAMS=(["ARMBIAN_RELAUNCHED"]="yes")
+	declare -g -A ARMBIAN_CLI_RELAUNCH_ENVS=(["ARMBIAN_RELAUNCHED"]="yes")
 
 	# Keep a running array of config files needed for relaunch.
 	declare -g -a ARMBIAN_CLI_RELAUNCH_CONFIGS=()

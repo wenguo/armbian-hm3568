@@ -10,7 +10,15 @@
 function artifact_rootfs_config_dump() {
 	artifact_input_variables[ARCH]="${ARCH}"
 	artifact_input_variables[RELEASE]="${RELEASE}"
-	artifact_input_variables[CACHE_TYPE]="${cache_type:-"no_cache_type_yet"}"
+	artifact_input_variables[SELECTED_CONFIGURATION]="${SELECTED_CONFIGURATION}" # should be represented below anyway
+	artifact_input_variables[BUILD_MINIMAL]="${BUILD_MINIMAL}"
+	artifact_input_variables[DESKTOP_ENVIRONMENT]="${DESKTOP_ENVIRONMENT:-"no_DESKTOP_ENVIRONMENT_set"}"
+	artifact_input_variables[DESKTOP_ENVIRONMENT_CONFIG_NAME]="${DESKTOP_ENVIRONMENT_CONFIG_NAME:-"no_DESKTOP_ENVIRONMENT_CONFIG_NAME_set"}"
+	artifact_input_variables[DESKTOP_APPGROUPS_SELECTED]="${DESKTOP_APPGROUPS_SELECTED:-"no_DESKTOP_APPGROUPS_SELECTED_set"}"
+	# Hash of the packages added/removed by extensions
+	declare pkgs_hash="undetermined"
+	pkgs_hash="$(echo "${REMOVE_PACKAGES[*]} ${EXTRA_PACKAGES_ROOTFS[*]}" | sha256sum | cut -d' ' -f1)"
+	artifact_input_variables[EXTRA_PKG_ADD_REMOVE_HASH]="${pkgs_hash}"
 }
 
 function artifact_rootfs_prepare_version() {
@@ -33,16 +41,18 @@ function artifact_rootfs_prepare_version() {
 		"cache_id \"${rootfs_cache_id}\""
 	)
 
-	# @TODO: "rootfs_cache_id" contains "cache_type", split so we don't repeat ourselves
-	# @TODO: gotta include the extensions rootfs-modifying id to cache_type...
+	# rootfs does NOT include ${artifact_prefix_version} -- there's no reason to, since rootfs is not in an apt repo
+	# instead, we use YYYYMM to make a new rootfs cache version per-month, even if nothing else changes.
+	declare yyyymm="undetermined"
+	yyyymm="$(date +%Y%m)"
 
 	# outer scope
-	artifact_version="${artifact_prefix_version}${rootfs_cache_id}"
+	artifact_version="${yyyymm}-${rootfs_cache_id}"
 	artifact_version_reason="${reasons[*]}"
-	artifact_name="${ARCH}-${RELEASE}-${cache_type}"
+	artifact_name="rootfs-${ARCH}-${RELEASE}-${cache_type}"
 	artifact_type="tar.zst"
 	artifact_base_dir="${SRC}/cache/rootfs"
-	artifact_final_file="${SRC}/cache/rootfs/${ARCH}-${RELEASE}-${rootfs_cache_id}.tar.zst"
+	artifact_final_file="${SRC}/cache/rootfs/${artifact_name}_${artifact_version}.tar.zst"
 
 	return 0
 }
@@ -99,6 +109,7 @@ function artifact_rootfs_cli_adapter_pre_run() {
 }
 
 function artifact_rootfs_cli_adapter_config_prep() {
+	declare -g artifact_version_requires_aggregation="yes"
 	declare -g ROOTFS_COMPRESSION_RATIO="${ROOTFS_COMPRESSION_RATIO:-"15"}" # default to Compress stronger when we make rootfs cache
 
 	# If BOARD is set, use it to convert to an ARCH.
@@ -132,7 +143,7 @@ function artifact_rootfs_cli_adapter_config_prep() {
 }
 
 function artifact_rootfs_get_default_oci_target() {
-	artifact_oci_target_base="ghcr.io/armbian/cache-root/"
+	artifact_oci_target_base="${GHCR_SOURCE}/armbian/cache-root/"
 }
 
 function artifact_rootfs_is_available_in_local_cache() {
