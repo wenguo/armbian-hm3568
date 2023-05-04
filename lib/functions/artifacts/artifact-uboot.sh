@@ -13,6 +13,7 @@ function artifact_uboot_config_dump() {
 	artifact_input_variables[BOOTPATCHDIR]="${BOOTPATCHDIR}"
 	artifact_input_variables[BOARD]="${BOARD}"
 	artifact_input_variables[BRANCH]="${BRANCH}"
+	artifact_input_variables[ARCH]="${ARCH}"
 }
 
 function artifact_uboot_prepare_version() {
@@ -173,7 +174,7 @@ function artifact_uboot_cli_adapter_config_prep() {
 }
 
 function artifact_uboot_get_default_oci_target() {
-	artifact_oci_target_base="${GHCR_SOURCE}/armbian/cache-uboot/"
+	artifact_oci_target_base="${GHCR_SOURCE}/armbian/os/"
 }
 
 function artifact_uboot_is_available_in_local_cache() {

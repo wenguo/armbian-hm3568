@@ -15,6 +15,7 @@ function artifact_kernel_config_dump() {
 	artifact_input_variables[KERNELSOURCE]="${KERNELSOURCE}"
 	artifact_input_variables[KERNELBRANCH]="${KERNELBRANCH}"
 	artifact_input_variables[KERNELPATCHDIR]="${KERNELPATCHDIR}"
+	artifact_input_variables[ARCH]="${ARCH}"
 }
 
 # This is run in a logging section.
@@ -236,7 +237,7 @@ function artifact_kernel_cli_adapter_config_prep() {
 }
 
 function artifact_kernel_get_default_oci_target() {
-	artifact_oci_target_base="${GHCR_SOURCE}/armbian/cache-kernel/"
+	artifact_oci_target_base="${GHCR_SOURCE}/armbian/os/"
 }
 
 function artifact_kernel_is_available_in_local_cache() {
