@@ -76,9 +76,10 @@ def generate_matrix_images(info) -> list[dict]:
 		image = info["images"][image_id]
 
 		if armbian_utils.get_from_env("IMAGES_ONLY_OUTDATED_ARTIFACTS") == "yes":
+			log.info(f"IMAGES_ONLY_OUTDATED_ARTIFACTS is set: outdated artifacts: {image['outdated_artifacts_count']} for image {image_id}")
 			skip = image["outdated_artifacts_count"] == 0
 			if skip:
-				log.info(f"Skipping image {image_id} because it has no outdated artifacts")
+				log.warning(f"Skipping image {image_id} because it has no outdated artifacts")
 				continue
 
 		if armbian_utils.get_from_env("SKIP_IMAGES") == "yes":
@@ -92,7 +93,7 @@ def generate_matrix_images(info) -> list[dict]:
 		image_arch = image['out']['ARCH']
 		runs_on = resolve_gha_runner_tags_via_pipeline_gha_config(inputs, "image", image_arch)
 
-		cmds = (armbian_utils.map_to_armbian_params(inputs["vars"]) + inputs["configs"])  # image build is "build" command, omitted here
+		cmds = (armbian_utils.map_to_armbian_params(inputs["vars"], True) + inputs["configs"])  # image build is "build" command, omitted here
 		invocation = " ".join(cmds)
 
 		item = {"desc": desc, "runs_on": runs_on, "invocation": invocation}
@@ -111,7 +112,7 @@ def generate_matrix_artifacts(info):
 
 		artifact_name = artifact['in']['artifact_name']
 
-		desc = f"{artifact['out']['artifact_final_file_basename']}"
+		desc = f"{artifact['out']['artifact_name']}={artifact['out']['artifact_version']}"
 
 		inputs = artifact['in']['original_inputs']
 
@@ -123,7 +124,7 @@ def generate_matrix_artifacts(info):
 
 		runs_on = resolve_gha_runner_tags_via_pipeline_gha_config(inputs, artifact_name, artifact_arch)
 
-		cmds = (["artifact"] + armbian_utils.map_to_armbian_params(inputs["vars"]) + inputs["configs"])
+		cmds = (["artifact"] + armbian_utils.map_to_armbian_params(inputs["vars"], True) + inputs["configs"])
 		invocation = " ".join(cmds)
 
 		item = {"desc": desc, "runs_on": runs_on, "invocation": invocation}
