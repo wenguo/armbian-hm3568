@@ -55,7 +55,20 @@ function artifact_uboot_prepare_version() {
 	# @TODO: this is even more grave in case of u-boot: v2022.10 has patches for many boards inside, gotta resolve.
 	declare patches_hash="undetermined"
 	declare hash_files="undetermined"
-	calculate_hash_for_all_files_in_dirs "${SRC}/patch/u-boot/${BOOTPATCHDIR}" "${USERPATCHES_PATH}/u-boot/${BOOTPATCHDIR}"
+	declare -a uboot_patch_dirs=()
+	for patch_dir in ${BOOTPATCHDIR} ; do
+		uboot_patch_dirs+=( "${SRC}/patch/u-boot/${patch_dir}" "${USERPATCHES_PATH}/u-boot/${patch_dir}" )
+	done
+
+	if [[ -n "${ATFSOURCE}" && "${ATFSOURCE}" != "none" ]]; then
+		uboot_patch_dirs+=( "${SRC}/patch/atf/${ATFPATCHDIR}" "${USERPATCHES_PATH}/atf/${ATFPATCHDIR}" )
+	fi
+
+	if [[ -n "${CRUSTCONFIG}" ]]; then
+		uboot_patch_dirs+=( "${SRC}/patch/crust/${CRUSTPATCHDIR}" "${USERPATCHES_PATH}/crust/${CRUSTPATCHDIR}" )
+	fi
+
+	calculate_hash_for_all_files_in_dirs "${uboot_patch_dirs[@]}"
 	patches_hash="${hash_files}"
 	declare uboot_patches_hash_short="${patches_hash:0:${short_hash_size}}"
 
@@ -83,7 +96,9 @@ function artifact_uboot_prepare_version() {
 	declare -a vars_to_hash=(
 		"${BOOTDELAY}" "${UBOOT_DEBUGGING}" "${UBOOT_TARGET_MAP}" # general for all families
 		"${BOOT_SCENARIO}" "${BOOT_SUPPORT_SPI}" "${BOOT_SOC}"    # rockchip stuff, sorry.
+		"${DDR_BLOB}" "${BL31_BLOB}" "${MINILOADER_BLOB}"         # More rockchip stuff, even more sorry.
 		"${ATF_COMPILE}" "${ATFBRANCH}" "${ATFPATCHDIR}"          # arm-trusted-firmware stuff
+		"${CRUSTCONFIG}" "${CRUSTBRANCH}" "${CRUSTPATCHDIR}"      # crust stuff
 	)
 	declare hash_variables="undetermined" # will be set by calculate_hash_for_variables(), which normalizes the input
 	calculate_hash_for_variables "${vars_to_hash[@]}"
@@ -139,6 +154,19 @@ function artifact_uboot_build_from_sources() {
 			fi
 		else
 			LOG_SECTION="compile_atf" do_with_logging compile_atf
+		fi
+	fi
+
+	if [[ -n "${CRUSTCONFIG}" ]]; then
+		if [[ "${ARTIFACT_BUILD_INTERACTIVE:-"no"}" == "yes" ]]; then
+			display_alert "Running crust build in interactive mode" "log file will be incomplete" "info"
+			compile_crust
+
+			if [[ "${CREATE_PATCHES_CRUST:-"no"}" == "yes" ]]; then
+				return 0 # stop here, otherwise it would build u-boot below...
+			fi
+		else
+			LOG_SECTION="compile_crust" do_with_logging compile_crust
 		fi
 	fi
 

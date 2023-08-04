@@ -55,6 +55,12 @@ function compile_uboot_target() {
 		# atftempdir is under WORKDIR, so no cleanup necessary.
 	fi
 
+	# crusttempdir comes from crust.sh's compile_crust()
+	if [[ -n $CRUSTSOURCE && -d "${crusttempdir}" ]]; then
+		display_alert "Copying over bin/elf's from crusttempdir" "${crusttempdir}" "debug"
+		run_host_command_logged cp -pv "${crusttempdir}"/*.bin "${crusttempdir}"/*.elf ./ # only works due to nullglob
+	fi
+
 	# Hook time, for extra post-processing
 	call_extension_method "pre_config_uboot_target" <<- 'PRE_CONFIG_UBOOT_TARGET'
 		*allow extensions prepare before configuring and compiling an u-boot target*
@@ -62,7 +68,7 @@ function compile_uboot_target() {
 		For example, changing Python version can be done by replacing the `${BIN_WORK_DIR}/python` symlink.
 	PRE_CONFIG_UBOOT_TARGET
 
-	display_alert "${uboot_prefix}Preparing u-boot config" "${version} ${target_make}" "info"
+	display_alert "${uboot_prefix}Preparing u-boot config '${BOOTCONFIG}'" "${version} ${target_make}" "info"
 	declare -g if_error_detail_message="${uboot_prefix}Failed to configure u-boot ${version} $BOOTCONFIG ${target_make}"
 	run_host_command_logged CCACHE_BASEDIR="$(pwd)" PATH="${toolchain}:${toolchain2}:${PATH}" \
 		"KCFLAGS=-fdiagnostics-color=always" \
@@ -147,11 +153,27 @@ function compile_uboot_target() {
 
 	fi
 
+	# cflags will be passed both as CFLAGS, KCFLAGS, and both as make params and as env variables.
+	# boards/families/extensions can customize this via the hook below
+	local -a uboot_cflags_array=(
+		"-fdiagnostics-color=always" # color messages
+		"-Wno-error=maybe-uninitialized"
+		"-Wno-error=misleading-indentation"   # patches have mismatching indentation
+		"-Wno-error=attributes"               # for very old-uboots
+		"-Wno-error=address-of-packed-member" # for very old-uboots
+	)
+	if linux-version compare "${gcc_version_main}" ge "11.0"; then
+		uboot_cflags_array+=(
+			"-Wno-error=array-parameter" # very old uboots
+		)
+	fi
+
 	# Hook time, for extra post-processing
 	call_extension_method "post_config_uboot_target" <<- 'POST_CONFIG_UBOOT_TARGET'
 		*allow extensions prepare after configuring but before compiling an u-boot target*
 		Some u-boot targets require extra configuration or pre-processing before compiling.
 		Last chance to change .config for u-boot before compiling.
+		Also the only chance to change the (local) array `uboot_cflags_array`.
 	POST_CONFIG_UBOOT_TARGET
 
 	if [[ "${UBOOT_CONFIGURE:-"no"}" == "yes" ]]; then
@@ -167,25 +189,8 @@ function compile_uboot_target() {
 	cross_compile="CROSS_COMPILE=\"$CCACHE $UBOOT_COMPILER\""
 	[[ -n $UBOOT_TOOLCHAIN2 ]] && cross_compile="ARMBIAN=foe" # empty parameter is not allowed
 
-	local ts=${SECONDS}
-
-	# cflags will be passed both as CFLAGS, KCFLAGS, and both as make params and as env variables.
-	# @TODO make configurable/expandable
-	local -a uboot_cflags_array=(
-		"-fdiagnostics-color=always" # color messages
-		"-Wno-error=maybe-uninitialized"
-		"-Wno-error=misleading-indentation"   # patches have mismatching indentation
-		"-Wno-error=attributes"               # for very old-uboots
-		"-Wno-error=address-of-packed-member" # for very old-uboots
-
-	)
-	if linux-version compare "${gcc_version_main}" ge "11.0"; then
-		uboot_cflags_array+=(
-			"-Wno-error=array-parameter" # very old uboots
-		)
-	fi
-
 	local uboot_cflags="${uboot_cflags_array[*]}"
+	local ts=${SECONDS}
 
 	display_alert "${uboot_prefix}Compiling u-boot" "${version} ${target_make} with gcc '${gcc_version_main}'" "info"
 	declare -g if_error_detail_message="${uboot_prefix}Failed to build u-boot ${version} ${target_make}"
@@ -404,7 +409,6 @@ function compile_uboot() {
 		Version: ${artifact_version}
 		Architecture: $ARCH
 		Maintainer: $MAINTAINER <$MAINTAINERMAIL>
-		Installed-Size: 1
 		Section: kernel
 		Priority: optional
 		Provides: armbian-u-boot

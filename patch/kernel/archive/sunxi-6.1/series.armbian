@@ -3,8 +3,6 @@
 #
 #	git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
 #
-	patches.armbian/drv-bluetooth-btrtl-Add-rtl8822cs-hci-ver-0008.patch
-	patches.armbian/Revert-net-Remove-net-ipx.h-and-uapi-linux-ipx.h-header-files.patch
 	patches.armbian/Doc-dt-bindings-usb-add-binding-for-DWC3-controller-on-Allwinne.patch
 	patches.armbian/drv-mfd-Add-support-for-AC200.patch
 	patches.armbian/drv-pinctrl-pinctrl-sun50i-a64-disable_strict_mode.patch
@@ -88,8 +86,15 @@
 	patches.armbian/arm64-dts-sun50i-h616-x96-mate-T95-eth-sd-card-hack.patch
 	patches.armbian/arm64-dts-sun50i-h616-x96-mate-add-hdmi.patch
 	patches.armbian/arm64-dts-allwinner-h616-Add-device-node-for-SID.patch
+	patches.armbian/arm64-dts-allwinner-h616-Add-efuse_xlate-cpu-frequency-scaling-v1_6_1.patch
 	patches.armbian/arm64-dts-allwinner-h616-Add-thermal-sensor-and-thermal-zones.patch
 	patches.armbian/arm64-dts-allwinner-h616-Fix-thermal-zones-missing-trips.patch
+	patches.armbian/drv-pmic-add-axp313a.patch
+	patches.armbian/drv-staging-fbtft-add-st7796s.patch
+	patches.armbian/drv-touchscreen-tsc2007-polling.patch
+	patches.armbian/drv-rgb-add-ws2812.patch
+	patches.armbian/arm64-dts-allwinner-h616-LED-green_power_on-red_status_heartbeat.patch
+	patches.armbian/arm64-dts-allwinner-h616-orangepi-zero2-Enable-expansion-board-USB-ports.patch
 ###################
 	patches.armbian/arm64-dts-sun50i-a64-pinebook-enable-Bluetooth.patch
 	patches.armbian/arm64-dts-sun50i-a64-pine64-enable-Bluetooth.patch
@@ -127,6 +132,7 @@
 	patches.armbian/arm64-dts-overlay-sun50i-h5-add-gpio-regulator-overclock.patch
 	patches.armbian/Move-sun50i-h6-pwm-settings-to-its-own-overlay.patch
 	patches.armbian/Compile-the-pwm-overlay.patch
+	patches.armbian/arm64-dts-overlay-sun50i-h616-bigtreetech-cb1.patch
 ###################
 	patches.armbian/arm-dts-sunxi-h3-h5.dtsi-add-i2s0-i2s1-pins.patch
 	patches.armbian/arm-dts-sun5i-a13-olinuxino-micro-add-panel-lcd-olinuxino-4.3.patch
@@ -167,5 +173,10 @@
 	patches.armbian/net-usb-r8152-add-LED-configuration-from-OF.patch
 	patches.armbian/arm64-dts-sun50i-h6-orangepi.dtsi-Rollback-r_rsb-to-r_i2c.patch
 	patches.armbian/mfd-sunxi-ac200-fix-error-initialization.patch
-	patches.armbian/arm-dts-sun8i-h3-orangepizero-add_tve.patch
+	patches.armbian/arm-dts-sunxi-h3-h5-add_tve.patch
 	patches.armbian/arm-dts-sun8i-h3-fix-thermal-read.patch
+	patches.armbian/arm64-dts-sun50i-h616-bigtreetech-cb1.patch
+	patches.armbian/arm-dts-sun8i-h3-nanopi-duo2-enable-powerbutton-and-ethernet.patch
+	patches.armbian/arm-dts-sun8i-h3-reduce-opp-microvolt-to-prevent-not.patch
+	patches.armbian/arm64-dts-sun50i-h5-enable-power-button-for-orangepi-prime.patch
+	patches.armbian/arm64-dts-sun50i-h5-Add-missing-GPU-trip-point.patch

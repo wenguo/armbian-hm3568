@@ -160,6 +160,8 @@ function config_early_init() {
 
 	display_alert "Starting single build process" "${BOARD:-"no BOARD set"}" "info"
 
+	declare -g -a KERNEL_DRIVERS_SKIP=() # Prepare array to be filled in by board/family/extensions
+
 	return 0 # protect against eventual shortcircuit above
 }
 
@@ -202,6 +204,11 @@ function config_post_main() {
 	if [[ -n $ATFSOURCE ]]; then
 		declare -g ATFSOURCEDIR
 		ATFSOURCEDIR="${ATFDIR}/$(branch2dir "${ATFBRANCH}")"
+	fi
+
+	if [[ -n $CRUSTSOURCE ]]; then
+		declare -g CRUSTSOURCEDIR
+		CRUSTSOURCEDIR="${CRUSTDIR}/$(branch2dir "${CRUSTBRANCH}")"
 	fi
 
 	declare -g CHOSEN_UBOOT=linux-u-boot-${BRANCH}-${BOARD}

@@ -16,6 +16,7 @@ function artifact_kernel_config_dump() {
 	artifact_input_variables[KERNELBRANCH]="${KERNELBRANCH}"
 	artifact_input_variables[KERNELPATCHDIR]="${KERNELPATCHDIR}"
 	artifact_input_variables[ARCH]="${ARCH}"
+	artifact_input_variables[EXTRAWIFI]="${EXTRAWIFI:-"yes"}"
 }
 
 # This is run in a logging section.
@@ -85,18 +86,31 @@ function artifact_kernel_prepare_version() {
 	# Sanity check, the SHA1 gotta be sane.
 	[[ "${GIT_INFO_KERNEL[SHA1]}" =~ ^[0-9a-f]{40}$ ]] || exit_with_error "SHA1 is not sane: '${GIT_INFO_KERNEL[SHA1]}'"
 
+	# Set a readonly global with the kernel SHA1. Will be used later for the drivers cache_key.
+	declare -g -r KERNEL_GIT_SHA1="${GIT_INFO_KERNEL[SHA1]}"
+
 	declare short_sha1="${GIT_INFO_KERNEL[SHA1]:0:${short_hash_size}}"
 
-	# get the drivers hash...
-	declare kernel_drivers_patch_hash
-	do_with_hooks kernel_drivers_create_patches_hash_only
+	# get the drivers hash... or "0000000000000000" if EXTRAWIFI=no
+	if [[ "${EXTRAWIFI:-"yes"}" == "no" ]]; then
+		display_alert "Skipping drivers patch hash for kernel" "due to EXTRAWIFI=no" "info"
+		declare kernel_drivers_patch_hash="0000000000000000"
+	else
+		declare kernel_drivers_patch_hash
+		do_with_hooks kernel_drivers_create_patches_hash_only
+	fi
 	declare kernel_drivers_hash_short="${kernel_drivers_patch_hash:0:${short_hash_size}}"
 
 	# get the kernel patches hash...
 	# @TODO: why not just delegate this to the python patching, with some "dry-run" / hash-only option?
 	declare patches_hash="undetermined"
 	declare hash_files="undetermined"
-	calculate_hash_for_all_files_in_dirs "${SRC}/patch/kernel/${KERNELPATCHDIR}" "${USERPATCHES_PATH}/kernel/${KERNELPATCHDIR}"
+	display_alert "User patches directory for kernel" "${USERPATCHES_PATH}/kernel/${KERNELPATCHDIR}" "info"
+	declare -a kernel_patch_dirs=()
+	for patch_dir in ${KERNELPATCHDIR}; do
+		kernel_patch_dirs+=("${SRC}/patch/kernel/${patch_dir}" "${USERPATCHES_PATH}/kernel/${patch_dir}")
+	done
+	calculate_hash_for_all_files_in_dirs "${kernel_patch_dirs[@]}"
 	patches_hash="${hash_files}"
 	declare kernel_patches_hash_short="${patches_hash:0:${short_hash_size}}"
 
