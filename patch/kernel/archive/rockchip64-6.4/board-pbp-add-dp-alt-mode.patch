@@ -179,22 +179,20 @@ diff --git a/drivers/usb/typec/bus.c b/drivers/usb/typec/bus.c
 index 098f0efaa58d..19d2a2078c29 100644
 --- a/drivers/usb/typec/bus.c
 +++ b/drivers/usb/typec/bus.c
-@@ -185,8 +185,14 @@ EXPORT_SYMBOL_GPL(typec_altmode_exit);
-  */
- void typec_altmode_attention(struct typec_altmode *adev, u32 vdo)
+@@ -187,8 +187,11 @@ int typec_altmode_attention(struct typec_altmode *adev, u32 vdo)
  {
--	struct typec_altmode *pdev = &to_altmode(adev)->partner->adev;
-+	struct typec_altmode *pdev;
-+	WARN_ONCE(!adev, "typec bus attention: adev is NULL!");
-+	WARN_ONCE(!to_altmode(adev)->partner, "typec bus attention: partner is NULL!");
-+	if(!adev || !to_altmode(adev)->partner) {
-+		return;
-+	}
+ 	struct altmode *partner = to_altmode(adev)->partner;
+ 	struct typec_altmode *pdev;
++    
++       WARN_ONCE(!adev, "typec bus attention: adev is NULL!");
++	WARN_ONCE(!partner, "typec bus attention: partner is NULL!");
  
-+    pdev = &to_altmode(adev)->partner->adev;
- 	if (pdev->ops && pdev->ops->attention)
- 		pdev->ops->attention(pdev, vdo);
- }
+-	if (!partner)
++	if (!adev || !partner)
+ 		return -ENODEV;
+ 
+ 	pdev = &partner->adev;
+	
 diff --git a/drivers/usb/typec/tcpm/tcpm.c b/drivers/usb/typec/tcpm/tcpm.c
 index be1708e30e91..38bd8e8f5591 100644
 --- a/drivers/usb/typec/tcpm/tcpm.c
