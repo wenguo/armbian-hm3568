@@ -433,6 +433,8 @@
 };
 
 &vopb {
+	assigned-clocks = <&cru DCLK_VOP0_DIV>;
+	assigned-clock-parents = <&cru PLL_VPLL>;
 	status = "okay";
 };
 
@@ -441,6 +443,8 @@
 };
 
 &vopl {
+	assigned-clocks = <&cru DCLK_VOP1_DIV>;
+	assigned-clock-parents = <&cru PLL_CPLL>;
 	status = "okay";
 };
 
@@ -453,6 +457,8 @@
 };
 
 &rga {
+	assigned-clocks = <&cru ACLK_RGA>,<&cru HCLK_RGA>,<&cru SCLK_RGA_CORE>;
+	assigned-clock-rates = <600000000>,<300000000>,<600000000>;
 	status = "okay";
 };
 
