@@ -127,27 +127,6 @@
 		};
 	};
 
-	rt5651-sound {
-		compatible = "simple-audio-card";
-		simple-audio-card,name = "realtek,rt5651-codec";
-		simple-audio-card,format = "i2s";
-		simple-audio-card,mclk-fs = <256>;
-		simple-audio-card,widgets =
-			"Microphone", "Mic Jack",
-			"Headphone", "Headphone Jack";
-		simple-audio-card,routing =
-			"Mic Jack", "MICBIAS1",
-			"IN1P", "Mic Jack",
-			"Headphone Jack", "HPOL",
-			"Headphone Jack", "HPOR";
-		simple-audio-card,cpu {
-			sound-dai = <&i2s1>;
-		};
-		simple-audio-card,codec {
-			sound-dai = <&rt5651>;
-		};
-	};
-
 	sdio_pwrseq: sdio-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		clocks = <&rk808 1>;
@@ -238,6 +217,63 @@
 		regulator-min-microvolt = <900000>;
 		regulator-max-microvolt = <900000>;
 	};
+
+
+	rt5651_sound: rt5651-sound {
+		status = "okay";
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,name = "realtek,rt5651-codec";
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,widgets =
+			"Microphone", "Mic Jack",
+			"Headphone", "Headphone Jack";
+		simple-audio-card,routing =
+			"Mic Jack", "MICBIAS1",
+			"IN1P", "Mic Jack",
+			"Headphone Jack", "HPOL",
+			"Headphone Jack", "HPOR";
+		simple-audio-card,cpu {
+			sound-dai = <&i2s0>;
+		};
+		simple-audio-card,codec {
+			sound-dai = <&rt5651>;
+		};
+	};
+
+	hdmi_sound: hdmi-sound {
+		status = "okay";
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,name = "rockchip,hdmi";
+
+		simple-audio-card,cpu {
+			sound-dai = <&i2s2>;
+		};
+		simple-audio-card,codec {
+			sound-dai = <&hdmi>;
+		};
+	};
+
+	spdif-sound {
+		status = "okay";
+		compatible = "simple-audio-card";
+		simple-audio-card,name = "ROCKCHIP,SPDIF";
+		simple-audio-card,cpu {
+			sound-dai = <&spdif>;
+		};
+		simple-audio-card,codec {
+			sound-dai = <&spdif_out>;
+		};
+	};
+
+	spdif_out: spdif-out {
+		status = "okay";
+		compatible = "linux,spdif-dit";
+		#sound-dai-cells = <0>;
+	};
+
 };
 
 &cpu_l0 {
@@ -305,11 +341,48 @@
 	status = "okay";
 };
 
+&cdn_dp {
+	status = "okay";
+	reset-gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
+	int-gpios = <&gpio4 25 GPIO_ACTIVE_HIGH>;
+};
+
+&edp_in_vopl {
+	status = "okay";
+};
+
+&edp_in_vopb {
+	status = "disabled";
+};
+
+&backlight {
+	status = "okay";
+	enable-gpios = <&gpio4 21 GPIO_ACTIVE_HIGH>;
+};
+
+
 &hdmi {
 	ddc-i2c-bus = <&i2c3>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&hdmi_cec>;
 	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&hdmi_i2c_xfer>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	#sound-dai-cells = <0>;
+	rockchip,phy-table =
+		<74250000 0x8009 0x0004 0x0272>,
+		<165000000 0x802b 0x0004 0x0209>,
+		<297000000 0x803d 0x0005 0x028d>,
+		<594000000 0x803d 0x0000 0x00ed>,
+		<000000000 0x0000 0x0000 0x0000>;
+};
+
+&hdmi_in_vopb {
+	status = "okay";
+};
+
+&hdmi_in_vopl {
+	status = "disabled";
 };
 
 &i2c0 {
@@ -565,6 +638,19 @@
 
 };
 
+&i2c2 {
+	status = "okay";
+        lt9211@2d {
+                compatible = "lontium,lt9211";
+                reg = <0x2d>;
+		reset-gpios = <&gpio2 6 GPIO_ACTIVE_LOW>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&lt9211_rst>;
+        };
+
+};
+
+
 &i2c3 {
 	i2c-scl-rising-time-ns = <450>;
 	i2c-scl-falling-time-ns = <15>;
@@ -591,13 +677,16 @@
         };
 };
 
-&i2s1 {
-	rockchip,playback-channels = <2>;
-	rockchip,capture-channels = <2>;
+&i2s0 {
 	status = "okay";
+	rockchip,i2s-broken-burst-len;
+	rockchip,playback-channels = <8>;
+	rockchip,capture-channels = <8>;
+	#sound-dai-cells = <0>;
 };
 
 &i2s2 {
+	#sound-dai-cells = <0>;
 	status = "okay";
 };
 
@@ -655,12 +744,6 @@
 	};
 
 
-	lcd-panel {
-		lcd_panel_reset: lcd-panel-reset {
-			rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_up>;
-		};
-	};
-
 	leds {
 
 
@@ -686,7 +769,7 @@
 
 	rt5651 {
 		rt5651_hpcon: rt5640-hpcon {
-			rockchip,pins = <4 RK_PD4 RK_FUNC_GPIO &pcfg_pull_none>;
+			rockchip,pins = <3 RK_PD5 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
@@ -709,6 +792,24 @@
 
 		vcc5v0_host1_en: vcc5v0-host1-en {
 			rockchip,pins = <0 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+	usb {
+                usbhub_rst: usbhub-rst {
+                        rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_output_high>;
+                };
+	};
+
+	rk_headset {
+		hp_det: hp-det {
+			rockchip,pins = <4 RK_PA5 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+	lt9211-reset {
+		lt9211_rst: lt9211-rst {
+			rockchip,pins = <2 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
@@ -836,8 +937,15 @@
 	status = "okay";
 };
 
+&uart4 {
+	status = "okay";
+};
+
+
 &usb_host0_ehci {
 	status = "okay";
+	pinctrl-0 = <&usbhub_rst>;
+
 };
 
 &usb_host0_ohci {
