@@ -22,6 +22,7 @@
 	};
 
 	backlight: backlight {
+		status = "disabled";
 		compatible = "pwm-backlight";
 		pwms = <&pwm0 0 25000 0>;
 		brightness-levels = <
@@ -184,13 +185,13 @@
 		vin-supply = <&dc_12v>;
 	};
 	/* For USB2.0 Port1/2 */
-	vcc5v0_host3: vcc5v0-host3-regulator {
+	vcc5v0_host: vcc5v0-host-regulator {
 		compatible = "regulator-fixed";
 		enable-active-high;
-		gpio = <&gpio4 26 GPIO_ACTIVE_HIGH>;
+		gpio = <&gpio4 RK_PD2 GPIO_ACTIVE_HIGH>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&vcc5v0_host3_en>;
-		regulator-name = "vcc5v0_host3";
+		pinctrl-0 = <&vcc5v0_host_en>;
+		regulator-name = "vcc5v0_host";
 		regulator-always-on;
 		vin-supply = <&vcc5v0_io>;
 	};
@@ -354,9 +355,9 @@
 	pinctrl-0 = <&rgmii_pins>;
 	snps,reset-gpio = <&gpio3 RK_PB7 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
-	snps,reset-delays-us = <0 10000 50000>;
-	tx_delay = <0x28>;
-	rx_delay = <0x11>;
+        snps,reset-delays-us = <0 30000 300000>;
+        tx_delay = <0x1d>;
+        rx_delay = <0x1b>;
 	status = "okay";
 
 	mdio {
@@ -380,6 +381,57 @@
 	status = "okay";
 };
 
+&hdmi {
+	status = "okay";
+        pinctrl-names = "default";
+        pinctrl-0 = <&hdmi_cec>;
+	ddc-i2c-bus = <&i2c3>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	#sound-dai-cells = <0>;
+	rockchip,phy-table =
+		<74250000 0x8009 0x0004 0x0272>,
+		<165000000 0x802b 0x0004 0x0209>,
+		<297000000 0x803d 0x0005 0x028d>,
+		<594000000 0x803d 0x0000 0x00ed>,
+		<000000000 0x0000 0x0000 0x0000>;
+};
+
+&vopb {
+	assigned-clocks = <&cru DCLK_VOP0_DIV>;
+	assigned-clock-parents = <&cru PLL_VPLL>;
+	status = "disabled";
+};
+
+&vopb_mmu {
+	status = "okay";
+};
+
+&vopl {
+	assigned-clocks = <&cru DCLK_VOP1_DIV>;
+	assigned-clock-parents = <&cru PLL_CPLL>;
+	status = "okay";
+};
+
+&vopl_mmu {
+	status = "okay";
+};
+
+
+&rga {
+	assigned-clocks = <&cru ACLK_RGA>,<&cru HCLK_RGA>,<&cru SCLK_RGA_CORE>;
+	assigned-clock-rates = <600000000>,<300000000>,<600000000>;
+	status = "okay";
+};
+
+&hdmi_in_vopb {
+	status = "okay";
+};
+
+&hdmi_in_vopl {
+	status = "disabled";
+};
+
 &cdn_dp {
 	status = "okay";
 	reset-gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
@@ -399,30 +451,6 @@
 	enable-gpios = <&gpio4 21 GPIO_ACTIVE_HIGH>;
 };
 
-
-&hdmi {
-	status = "okay";
-        pinctrl-names = "default";
-        pinctrl-0 = <&hdmi_cec>;
-	ddc-i2c-bus = <&i2c3>;
-	#address-cells = <1>;
-	#size-cells = <0>;
-	#sound-dai-cells = <0>;
-	rockchip,phy-table =
-		<74250000 0x8009 0x0004 0x0272>,
-		<165000000 0x802b 0x0004 0x0209>,
-		<297000000 0x803d 0x0005 0x028d>,
-		<594000000 0x803d 0x0000 0x00ed>,
-		<000000000 0x0000 0x0000 0x0000>;
-};
-
-&hdmi_in_vopb {
-	status = "okay";
-};
-
-&hdmi_in_vopl {
-	status = "disabled";
-};
 
 &i2c0 {
 	status = "okay";
@@ -803,12 +831,9 @@
 
 
 	leds {
-
-
 		heartbeat_led_pin: heartbeat-led-pin {
 			rockchip,pins = <4 RK_PD4 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
-
 	};
 
 	pmic {
@@ -838,7 +863,7 @@
 	};
 
 	usb {
-		vcc5v0_host3_en: vcc5v0-host3-en {
+		vcc5v0_host_en: vcc5v0-host-en {
 			rockchip,pins = <4 RK_PD2 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 
@@ -931,14 +956,6 @@
 	status = "okay";
 };
 
-&tcphy0 {
-	status = "okay";
-};
-
-&tcphy1 {
-	status = "okay";
-};
-
 &tsadc {
 	/* tshut mode 0:CRU 1:GPIO */
 	rockchip,hw-tshut-mode = <1>;
@@ -947,6 +964,7 @@
 	status = "okay";
 };
 
+/*USB related*/
 &u2phy0 {
 	status = "okay";
 
@@ -955,7 +973,7 @@
 	};
 
 	u2phy0_host: host-port {
-		phy-supply = <&vcc5v0_host3>;
+		phy-supply = <&vcc5v0_host>;
 		status = "okay";
 	};
 
@@ -969,36 +987,16 @@
 	};
 
 	u2phy1_host: host-port {
-		phy-supply = <&vcc5v0_host3>;
+		phy-supply = <&vcc5v0_host>;
 		status = "okay";
 	};
 };
 
-&uart0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&uart0_xfer &uart0_cts &uart0_rts>;
-	status = "okay";
-
-	bluetooth {
-		compatible = "brcm,bcm4345c5";
-		clocks = <&rk808 1>;
-		clock-names = "lpo";
-		device-wakeup-gpios = <&gpio2 RK_PD2 GPIO_ACTIVE_HIGH>;
-		host-wakeup-gpios = <&gpio0 RK_PA4 GPIO_ACTIVE_HIGH>;
-		shutdown-gpios = <&gpio0 RK_PB1 GPIO_ACTIVE_HIGH>;
-		max-speed = <1500000>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&bt_host_wake_l &bt_wake_l &bt_enable_h>;
-		vbat-supply = <&vcc3v3_sys>;
-		vddio-supply = <&vcc_1v8>;
-	};
-};
-
-&uart2 {
+&tcphy0 {
 	status = "okay";
 };
 
-&uart4 {
+&tcphy1 {
 	status = "okay";
 };
 
@@ -1039,30 +1037,32 @@
 	dr_mode = "host";
 };
 
-&vopb {
-	assigned-clocks = <&cru DCLK_VOP0_DIV>;
-	assigned-clock-parents = <&cru PLL_VPLL>;
+/* uart*/
+&uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart0_xfer &uart0_cts &uart0_rts>;
+	status = "okay";
+
+	bluetooth {
+		compatible = "brcm,bcm4345c5";
+		clocks = <&rk808 1>;
+		clock-names = "lpo";
+		device-wakeup-gpios = <&gpio2 RK_PD2 GPIO_ACTIVE_HIGH>;
+		host-wakeup-gpios = <&gpio0 RK_PA4 GPIO_ACTIVE_HIGH>;
+		shutdown-gpios = <&gpio0 RK_PB1 GPIO_ACTIVE_HIGH>;
+		max-speed = <1500000>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&bt_host_wake_l &bt_wake_l &bt_enable_h>;
+		vbat-supply = <&vcc3v3_sys>;
+		vddio-supply = <&vcc_1v8>;
+	};
+};
+
+&uart2 {
 	status = "okay";
 };
 
-&vopb_mmu {
-	status = "okay";
-};
-
-&vopl {
-	assigned-clocks = <&cru DCLK_VOP1_DIV>;
-	assigned-clock-parents = <&cru PLL_CPLL>;
-	status = "okay";
-};
-
-&vopl_mmu {
-	status = "okay";
-};
-
-
-&rga {
-	assigned-clocks = <&cru ACLK_RGA>,<&cru HCLK_RGA>,<&cru SCLK_RGA_CORE>;
-	assigned-clock-rates = <600000000>,<300000000>,<600000000>;
+&uart4 {
 	status = "okay";
 };
 
