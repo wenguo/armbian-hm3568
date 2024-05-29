@@ -24,7 +24,7 @@
 	backlight: backlight {
 		status = "disabled";
 		compatible = "pwm-backlight";
-		pwms = <&pwm0 0 25000 0>;
+		pwms = <&pwm1 0 25000 0>;
 		brightness-levels = <
 			  0   1   2   3   4   5   6   7
 			  8   9  10  11  12  13  14  15
@@ -253,7 +253,7 @@
         phy_on: vcc-phy-regulator {
                 compatible = "regulator-fixed";
                 enable-active-high;
-                gpio = <&gpio1 22 GPIO_ACTIVE_HIGH>;
+                gpio = <&gpio1 RK_PC6 GPIO_ACTIVE_HIGH>;
                 regulator-name = "phy_on";
                 regulator-always-on;
                 regulator-boot-on;
@@ -348,16 +348,16 @@
 	assigned-clocks = <&cru SCLK_RMII_SRC>;
 	assigned-clock-parents = <&clkin_gmac>;
 	clock_in_out = "input";
-	phy-supply = <&vcc_phy>;
+	phy-supply = <&vcc3v3_s3>;
 	phy-mode = "rgmii";
 	phy-handle = <&rtl8211e>;
 	pinctrl-names = "default";
-	pinctrl-0 = <&rgmii_pins>;
+	pinctrl-0 = <&rgmii_pins>, <&phy_intb>, <&phy_rstb>;
 	snps,reset-gpio = <&gpio3 RK_PB7 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
         snps,reset-delays-us = <0 30000 300000>;
-        tx_delay = <0x1d>;
-        rx_delay = <0x1b>;
+	tx_delay = <0x28>;
+	rx_delay = <0x11>;
 	status = "okay";
 
 	mdio {
@@ -367,11 +367,13 @@
 
 		rtl8211e: ethernet-phy@1 {
 			reg = <1>;
+			compatible = "ethernet-phy-id001c.c916";
 			interrupt-parent = <&gpio1>;
 			interrupts = <RK_PC4 IRQ_TYPE_LEVEL_LOW>;
 			reset-assert-us = <10000>;
 			reset-deassert-us = <30000>;
 			reset-gpios = <&gpio3 RK_PB7 GPIO_ACTIVE_LOW>;
+			max-speed = <1000>;
 		};
 	};
 };
@@ -772,7 +774,7 @@
 	ep-gpios = <&gpio2 RK_PD4 GPIO_ACTIVE_HIGH>;
 	num-lanes = <4>;
 	pinctrl-names = "default";
-	status = "disabled";
+	status = "okay";
 };
 
 
@@ -850,6 +852,16 @@
 		};
 	};
 
+	gmac {
+		phy_intb: phy-intb {
+			rockchip,pins = <1 RK_PC4 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+
+		phy_rstb: phy-rstb {
+			rockchip,pins = <3 RK_PB7 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
 	rt5651 {
 		rt5651_hpcon: rt5640-hpcon {
 			rockchip,pins = <3 RK_PD5 RK_FUNC_GPIO &pcfg_pull_none>;
@@ -898,10 +910,6 @@
 	};
 
 
-};
-
-&pwm0 {
-	status = "okay";
 };
 
 &saradc {
