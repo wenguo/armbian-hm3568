@@ -294,21 +294,6 @@
 		};
 	};
 
-	hdmi_sound: hdmi-sound {
-		status = "okay";
-		compatible = "simple-audio-card";
-		simple-audio-card,format = "i2s";
-		simple-audio-card,mclk-fs = <256>;
-		simple-audio-card,name = "rockchip,hdmi";
-
-		simple-audio-card,cpu {
-			sound-dai = <&i2s1>;
-		};
-		simple-audio-card,codec {
-			sound-dai = <&hdmi>;
-		};
-	};
-
 	spdif-sound {
 		status = "disabled";
 		compatible = "simple-audio-card";
@@ -397,11 +382,22 @@
 	status = "okay";
 };
 
+&crypto0 {
+	status = "disabled";
+};
+
+&crypto1 {
+	status = "disabled";
+};
 
 &hdmi {
 	ddc-i2c-bus = <&i2c3>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&hdmi_cec>;
+	status = "okay";
+};
+
+&hdmi_sound{
 	status = "okay";
 };
 
@@ -720,7 +716,7 @@
 	status = "okay";
 };
 
-&i2s1 {
+&i2s2 {
 	status = "okay";
 };
 
