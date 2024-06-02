@@ -1118,6 +1118,13 @@
 		};
 	};
 
+
+	i2s1 {
+		i2s_8ch_mclk: i2s-8ch-mclk {
+			rockchip,pins = <4 RK_PA0 1 &pcfg_pull_none>;
+		};
+	};
+
 	gpio-leds {
 		leds_gpio: leds-gpio {
 			rockchip,pins = <0 11 RK_FUNC_GPIO &pcfg_pull_none>;
