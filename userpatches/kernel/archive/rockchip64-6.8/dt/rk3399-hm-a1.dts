@@ -164,6 +164,8 @@
 	vcc5v0_sys: vcc5v0-sys {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc5v0_sys";
+		regulator-always-on;
+		regulator-boot-on;
 		regulator-min-microvolt = <5000000>;
 		regulator-max-microvolt = <5000000>;
 		vin-supply = <&vcc_sys>;
@@ -382,31 +384,22 @@
 	};
 };
 
+
 &gpu {
 	mali-supply = <&vdd_gpu>;
 	status = "okay";
 };
 
+
 &hdmi {
-	status = "okay";
-        pinctrl-names = "default";
-        pinctrl-0 = <&hdmi_cec>;
 	ddc-i2c-bus = <&i2c3>;
-	#address-cells = <1>;
-	#size-cells = <0>;
-	#sound-dai-cells = <0>;
-	rockchip,phy-table =
-		<74250000 0x8009 0x0004 0x0272>,
-		<165000000 0x802b 0x0004 0x0209>,
-		<297000000 0x803d 0x0005 0x028d>,
-		<594000000 0x803d 0x0000 0x00ed>,
-		<000000000 0x0000 0x0000 0x0000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&hdmi_cec>;
+	status = "okay";
 };
 
 &vopb {
-	assigned-clocks = <&cru DCLK_VOP0_DIV>;
-	assigned-clock-parents = <&cru PLL_VPLL>;
-	status = "disabled";
+	status = "okay";
 };
 
 &vopb_mmu {
@@ -414,49 +407,12 @@
 };
 
 &vopl {
-	assigned-clocks = <&cru DCLK_VOP1_DIV>;
-	assigned-clock-parents = <&cru PLL_CPLL>;
 	status = "okay";
 };
 
 &vopl_mmu {
 	status = "okay";
 };
-
-
-&rga {
-	assigned-clocks = <&cru ACLK_RGA>,<&cru HCLK_RGA>,<&cru SCLK_RGA_CORE>;
-	assigned-clock-rates = <600000000>,<300000000>,<600000000>;
-	status = "okay";
-};
-
-&hdmi_in_vopb {
-	status = "okay";
-};
-
-&hdmi_in_vopl {
-	status = "disabled";
-};
-
-&cdn_dp {
-	status = "okay";
-	reset-gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
-	int-gpios = <&gpio4 25 GPIO_ACTIVE_HIGH>;
-};
-
-&edp_in_vopl {
-	status = "okay";
-};
-
-&edp_in_vopb {
-	status = "disabled";
-};
-
-&backlight {
-	status = "okay";
-	enable-gpios = <&gpio4 21 GPIO_ACTIVE_HIGH>;
-};
-
 
 &i2c0 {
 	status = "okay";
@@ -707,7 +663,7 @@
 		clock-names = "mclk";
 		hp-det-gpio = <&gpio3 RK_PD5 GPIO_ACTIVE_LOW>;
 	};*/
-	rt5651: rt5651@34 {
+	rt5651: rt5651@1a{
 		#sound-dai-cells = <0>;
 		compatible = "rockchip,rt5651";
 		reg = <0x1a>;
@@ -721,9 +677,10 @@
 
 };
 
-&i2c2 {
-	status = "disabled";
-
+&i2c3 {
+	i2c-scl-rising-time-ns = <450>;
+	i2c-scl-falling-time-ns = <15>;
+	status = "okay";
 };
 
 &i2c4 {
