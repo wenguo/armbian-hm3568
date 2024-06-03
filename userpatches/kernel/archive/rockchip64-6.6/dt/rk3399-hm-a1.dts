@@ -350,7 +350,7 @@
 	pinctrl-0 = <&rgmii_pins>, <&phy_intb>, <&phy_rstb>;
 	phy-handle = <&rtl8211f>;
 	phy-mode = "rgmii";
-	phy-supply = <&vcc3v3_s3>;
+	phy-supply = <&vcc_lan>;
         tx_delay = <0x4d>;
         rx_delay = <0x2d>;
 	status = "okay";
@@ -362,12 +362,7 @@
 
 		rtl8211f: ethernet-phy@1 {
 			reg = <1>;
-			interrupt-parent = <&gpio1>;
-			interrupts = <RK_PC4 IRQ_TYPE_LEVEL_LOW>;
-			reset-assert-us = <10000>;
-			reset-deassert-us = <30000>;
-			reset-gpios = <&gpio3 RK_PB7 GPIO_ACTIVE_LOW>;
-			max-speed = <1000>;
+
 		};
 	};
 };
