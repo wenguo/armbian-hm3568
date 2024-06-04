@@ -364,7 +364,6 @@
 		rtl8211f: ethernet-phy@1 {
 			reg = <1>;
 			compatible = "ethernet-phy-id001c.c916";
-
 		};
 	};
 };
@@ -416,9 +415,6 @@
 	i2c-scl-rising-time-ns = <168>;
 	i2c-scl-falling-time-ns = <4>;
 	clock-frequency = <400000>;
-
-
-
 
 	rk808: pmic@1b {
 		compatible = "rockchip,rk808";
