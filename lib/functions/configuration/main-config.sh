@@ -61,6 +61,16 @@ function do_main_configuration() {
 
 	declare -g SKIP_EXTERNAL_TOOLCHAINS="${SKIP_EXTERNAL_TOOLCHAINS:-yes}" # don't use any external toolchains, by default.
 
+	# Network-manager and Chrony for standard CLI and desktop, systemd-networkd and systemd-timesyncd for minimal
+	# systemd-timesyncd is slimmer and less resource intensive than Chrony, see https://unix.stackexchange.com/questions/504381/chrony-vs-systemd-timesyncd-what-are-the-differences-and-use-cases-as-ntp-cli
+	if [[ ${BUILD_MINIMAL} == yes ]]; then
+		enable_extension "net-systemd-neworkd"
+		enable_extension "net-systemd-timesyncd"
+	else
+		enable_extension "net-network-manager"
+		enable_extension "net-chrony"
+	fi
+
 	# Timezone
 	if [[ -f /etc/timezone ]]; then # Timezone for target is taken from host, if it exists.
 		TZDATA=$(cat /etc/timezone)
@@ -570,4 +580,20 @@ function check_filesystem_compatibility_on_host() {
 		display_alert "Could not check filesystem support via /proc/filesystems on build host." "Build might fail in case of unsupported rootfs type." "wrn"
 	fi
 	return 0
+}
+
+function pre_install_distribution_specific__disable_cnf_apt_hook(){
+	if [[ $(dpkg --print-architecture) != "${ARCH}" && -f "${SDCARD}"/etc/apt/apt.conf.d/50command-not-found ]]; then #disable command-not-found (60% build-time saved under qemu)
+	display_alert "Disabling command-not-found during build-time to speed up image creation" "${BOARD}:${RELEASE}-${BRANCH}" "info"
+	run_host_command_logged mv "${SDCARD}"/etc/apt/apt.conf.d/50command-not-found "${SDCARD}"/etc/apt/apt.conf.d/50command-not-found.disabled
+        fi
+}
+
+
+function post_post_debootstrap_tweaks__restore_cnf_apt_hook(){
+	if [ -f "${SDCARD}"/etc/apt/apt.conf.d/50command-not-found.disabled ]; then # (re-enable command-not-found after building rootfs if it's been disabled)
+	display_alert "Enabling command-not-found after build-time " "${BOARD}:${RELEASE}-${BRANCH}" "info"
+	run_host_command_logged mv "${SDCARD}"/etc/apt/apt.conf.d/50command-not-found.disabled "${SDCARD}"/etc/apt/apt.conf.d/50command-not-found
+	fi
+
 }
