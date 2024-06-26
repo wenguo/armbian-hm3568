@@ -84,7 +84,7 @@
 	};
 
 	spirit-gpio {
-		status = "disable";
+		status = "disabled";
 		compatible = "spirit-io";
 		pinctrl-names = "default";
 		pinctrl-0 = <&spirit_io>;
