@@ -84,7 +84,7 @@
 	};
 
 	spirit-gpio {
-		status = "disable";
+		status = "disabled";
 		compatible = "spirit-io";
 		pinctrl-names = "default";
 		pinctrl-0 = <&spirit_io>;
@@ -294,6 +294,13 @@
 		};
 	};
 
+	dp_sound: dp-sound {
+		status = "okay";
+		compatible = "rockchip,cdndp-sound";
+		rockchip,cpu = <&spdif>;
+		rockchip,codec = <&cdn_dp 1>;
+	};
+
 	spdif-sound {
 		status = "disabled";
 		compatible = "simple-audio-card";
@@ -312,6 +319,13 @@
 		#sound-dai-cells = <0>;
 	};
 
+	virtual_pd: virtual-pd {
+		compatible = "linux,extcon-usbc-virtual-pd";
+		det-gpios = <&gpio4 RK_PD1 GPIO_ACTIVE_LOW>;	/* DP_HPD */
+		vpd-data-role = "display-port";
+		vpd-super-speed;
+		status = "okay";
+	};
 };
 
 &cpu_l0 {
@@ -407,6 +421,33 @@
 };
 
 &vopl_mmu {
+	status = "okay";
+};
+
+
+&hdmi_in_vopb {
+	status = "okay";
+};
+
+&hdmi_in_vopl {
+	status = "disabled";
+};
+
+&cdn_dp {
+	status = "okay";
+	extcon = <&virtual_pd>;
+	phys = <&tcphy0_dp>;
+};
+
+&dp_in_vopb {
+	status = "disabled";
+};
+
+&dp_in_vopl {
+	status = "okay";
+};
+
+&dp_sound {
 	status = "okay";
 };
 
@@ -826,9 +867,9 @@
 			rockchip,pins = <4 RK_PD2 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 
-                usbhub_rst: usbhub-rst {
-                        rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_output_high>;
-                };
+        usbhub_rst: usbhub-rst {
+            rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_output_high>;
+        };
 	};
 
 	vcc_sd {
@@ -850,6 +891,12 @@
 		};
 	};
 
+
+	cdndp {
+		dp_det: dp-det {
+			rockchip,pins = <4 RK_PD1 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
 };
 
 &saradc {
@@ -942,6 +989,7 @@
 
 &tcphy0 {
 	status = "okay";
+	extcon = <&virtual_pd>;
 };
 
 &tcphy1 {
@@ -950,6 +998,7 @@
 
 &usb_host0_ehci {
 	status = "okay";
+	pinctrl-names = "default";
 	pinctrl-0 = <&usbhub_rst>;
 
 };
