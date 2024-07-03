@@ -1,0 +1,15 @@
+[Unit]
+Description="idslinux"
+Requires=display-manager.service
+After=display-manager.service
+
+[Service]
+Environment="DISPLAY=:0"
+Environment=XAUTHORITY=
+ExecStart=/usr/bin/IDSLinux
+ExecStop=/usr/bin/killall IDSLinux
+Restart=on-failure
+Restart-sec=2
+
+[Install]
+WantedBy=graphical.target

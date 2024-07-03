@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Exec=IDSKiller 1>/dev/null
+Terminal=false
+Name=IDSKiller
+Icon=/usr/share/pixmaps/armbian/roymark_bw.png
+Comment=Roymark IDSKiller
+Type=Application
+Categories=Development

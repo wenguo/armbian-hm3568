@@ -83,6 +83,32 @@ case "$1" in
 		sed  -i "s/^eth1addr=.*/eth1addr=$MACADDR/" /boot/armbianEnv.txt
 	fi
 
+        if [[ -f /root/idslinux.tar.gz ]]; then
+                mkdir -p /opt/IDSLinux
+		mkdir -p /opt/IDSLinux/log
+                tar xvf /root/idslinux.tar.gz -C /opt/IDSLinux
+                rm /root/idslinux.tar.gz -rf
+		chown -R roymark /opt
+		setcap CAP_SYS_TIME+ep /bin/date
+		if [[ -f /opt/IDSLinux/bin/IDSLinux ]]; then
+			ln -s /opt/IDSLinux/bin/IDSLinux /usr/bin/IDSLinux
+			ln -s /opt/IDSLinux/bin/IDSKiller /usr/bin/IDSKiller
+
+			if [[ -d /home/roymark/桌面 ]]; then
+				install -Dm755 /usr/local/share/applications/idslinux.desktop /home/roymark/桌面
+				install -Dm755 /usr/local/share/applications/idskiller.desktop /home/roymark/桌面
+				chown roymark /home/roymark/桌面/idslinux.desktop
+				chown roymark /home/roymark/桌面/idskiller.desktop
+			elif [ -d /home/roymark/Desktop ]; then
+				install -Dm755 /usr/local/share/applications/idslinux.desktop /home/roymark/Desktop
+				install -Dm755 /usr/local/share/applications/idskiller.desktop /home/roymark/Desktop
+				chown roymark /home/roymark/Desktop/idslinux.desktop
+				chown roymark /home/roymark/Desktop/idskiller.desktop
+			fi
+		fi
+        fi
+
+
 	# hardware workarounds per family
 	case $LINUXFAMILY in
 		sun7i|sun8i)

@@ -1,0 +1,13 @@
+[Unit]
+Description="novnc through websockify"
+Requires=x11vnc.service
+After=x11vnc.service
+
+[Service]
+ExecStart=/usr/bin/websockify --web /usr/local/share/noVNC 5902 localhost:5901
+ExecStop=/usr/bin/websockify
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

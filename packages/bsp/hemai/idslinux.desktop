@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Exec=IDSLinux
+Terminal=false
+Name=IDSLinux
+Icon=/usr/share/pixmaps/armbian/roymark.png
+Comment=Roymark IDSLinux
+Type=Application
+Categories=Development
+Hidden=false
+StartupNotify=false
