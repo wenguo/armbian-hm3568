@@ -123,5 +123,13 @@ ntp
 ntpstat
 ntpdate
 paprefs
+firefox
+unrar
 libblockdev-crypto2
 libblockdev-mdraid2
+compiz
+compizconfig-settings-manager
+compiz-plugins-extra
+compiz-plugins-main
+compiz-plugins-main-default
+

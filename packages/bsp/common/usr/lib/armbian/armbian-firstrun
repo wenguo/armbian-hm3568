@@ -85,6 +85,15 @@ case "$1" in
 				chown roymark /home/roymark/Desktop/idskiller.desktop
 			fi
 		fi
+
+ 		#disable notification
+		#https://askubuntu.com/questions/104273/how-do-i-disable-pop-up-notifications-in-xubuntu
+		mv /usr/share/dbus-1/services/org.xfce.xfce4-notifyd.Notifications.service /usr/share/dbus-1/services/org.xfce.xfce4-notifyd.Notifications.service.disabled
+		rm /etc/xdg/autostart/org.gnome.Evolution-alarm-notify.desktop
+		rm /etc/xdg/autostart/ubuntu-advantage-notification.desktop
+		rm /etc/xdg/autostart/xfce4-notifyd.desktop
+		rm /etc/xdg/autostart/update-notifier.desktop
+		systemctl disable unattended-upgrades
         fi
 
 
